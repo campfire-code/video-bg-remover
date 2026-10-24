@@ -18,7 +18,7 @@ function cutout(i: number): string {
   return c.toDataURL('image/png');
 }
 
-const names = ['示例-商品视频.mp4', '示例-商品视频-侧拍.mp4', '示例-商品视频-旋转.mov', '示例-商品视频-细节.mp4'];
+const names = ['运动鞋-旋转展示.mp4', '保温杯-口播片段.mp4', '香薰蜡烛-桌面拍摄.mov', '帆布包-细节特写.mp4'];
 const sizes = [96_377, 2_410_000, 5_120_000, 1_870_000];
 const summary = ['透明 WebM · 96 帧 · 识别 49 次 · 1 分 4 秒', '透明 WebM · 240 帧 · 识别 121 次 · 1 分 38 秒 · 前 10 秒', '', ''];
 
@@ -26,7 +26,7 @@ export const rows = (state: string): Row[] =>
   state === 'empty' ? [] : names.map((name, i) => {
     const status: Row['status'] = state === 'done' ? 'ok' : i < 2 ? 'ok' : i === 2 ? 'run' : 'wait';
     return {
-      item: { id: `v${i}`, name, path: `/示例/${name}`, size: sizes[i] },
+      item: { id: `v${i}`, name, path: `/素材/${name}`, size: sizes[i] },
       status,
       progress: status === 'run' ? 0.46 : status === 'ok' ? 1 : 0,
       result: status === 'ok' ? { summary: summary[i] || '透明 WebM · 120 帧 · 识别 61 次 · 1 分 21 秒', preview: cutout(i), outputPath: '/tmp/out.webm' } : undefined,

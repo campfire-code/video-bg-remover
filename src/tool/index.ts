@@ -12,6 +12,7 @@ import {
 import { refineInterpolated } from './pipeline';
 import { processFrames } from './process';
 import type { SmoothKey } from './temporal';
+import { Empty, ResultBody } from './ui';
 
 /** 可替换的外部依赖，测试里换成假的 */
 export const deps = {
@@ -35,7 +36,7 @@ const EXAMPLE = { secs: 10, fps: 24 };
 const exampleHelp = (() => {
   const lim: Limits = { maxSecs: EXAMPLE.secs, fps: EXAMPLE.fps, maxSide: 0 };
   const t = (maskFps: number, m: ModelKey) => fmtDuration(estimate(EXAMPLE.secs, lim, maskFps, m).seconds);
-  return `识别越密，运动中的商品越贴合，但越慢。例：${EXAMPLE.secs} 秒视频、${EXAMPLE.fps} 帧/秒，每秒识别 12 次，轻模型约 ${t(12, 'light')}、高清约 ${t(12, 'hd')}；每秒识别 6 次，轻模型约 ${t(6, 'light')}、高清约 ${t(6, 'hd')}。两次识别之间的画面用插值补上，商品移动快时间隔太大边缘会发虚。这是 Apple 芯片 Mac 上的实测推算（轻模型每次约 ${SEC_PER_INFER.light} 秒，高清每次约 ${SEC_PER_INFER.hd} 秒），只含识别，抽帧和合成另计，你的电脑会有差别`;
+  return `识别越密，运动中的商品越贴合，但越慢。例：${EXAMPLE.secs} 秒视频、${EXAMPLE.fps} 帧/秒，每秒识别 12 次，轻模型约 ${t(12, 'light')}、高清约 ${t(12, 'hd')}；每秒识别 6 次，轻模型约 ${t(6, 'light')}、高清约 ${t(6, 'hd')}。两次识别之间的画面用插值补上，商品移动快时间隔太大边缘会发虚。这是苹果芯片 Mac 上的实测推算（轻模型每次约 ${SEC_PER_INFER.light} 秒，高清每次约 ${SEC_PER_INFER.hd} 秒），只含识别，抽帧和合成另计，你的电脑会有差别`;
 })();
 
 const ext = (name: string) => name.split('.').pop()?.toLowerCase() ?? '';
@@ -49,6 +50,8 @@ const tool: BatchTool = {
   type: 'media',
   mode: 'batch',
   resultView: 'list',
+  Empty,
+  ResultBody,
   concurrency: 1,
   accept: { label: '商品视频', extensions: VIDEO_EXTS },
   check: (item) => (VIDEO_EXTS.includes(ext(item.name)) ? null : `不是支持的视频格式（支持 ${VIDEO_EXTS.join('、')}）`),
@@ -63,7 +66,7 @@ const tool: BatchTool = {
     { key: 'bgImage', label: '背景图片', type: 'file', when: (p) => p.bg === 'image', extensions: IMAGE_EXTS, fileLabel: '图片', default: '', help: '等比放大铺满画面，多余部分居中裁掉；输出为 MP4' },
     {
       key: 'model', label: '抠图模型', type: 'segment', options: [['light', '轻模型（快）'], ['hd', '高清模式（慢）']], default: 'light',
-      help: '轻模型 U²-Net（u2netp）随应用自带；高清模式用 BiRefNet lite，边缘更细，每次识别约慢 5 倍，首次使用需下载约 183 MB 模型',
+      help: '轻模型随应用自带；高清模式用 BiRefNet 模型，边缘更细，每次识别约慢 5 倍，首次使用需下载约 183 MB 模型',
     },
     { key: 'modelFile', label: '本地模型文件（可选）', type: 'file', when: (p) => p.model === 'hd', extensions: ['onnx'], fileLabel: '模型文件', default: '', help: '下载不了时，可手动下载 birefnet-lite-512 的 model.onnx 在这里选择' },
     { key: 'maxSecs', label: '最多处理前几秒', type: 'number', default: 10, min: 1, max: 60, unit: '秒', help: '视频更长时只处理开头这一段，避免等太久；想处理更长可调大' },
