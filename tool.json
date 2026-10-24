@@ -1,0 +1,17 @@
+{
+  "id": "e05",
+  "slug": "video-bg-remover",
+  "name": "商品短视频去背景",
+  "version": "0.1.0",
+  "repo": "campfire-code/video-bg-remover",
+  "license": "MIT",
+  "ui": {
+    "layout": "a",
+    "palette": "teal"
+  },
+  "upstream": {
+    "repo": "danielgatis/rembg",
+    "license": "MIT"
+  },
+  "ffmpeg": true
+}
